@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Wifi, Thermometer, Chart } from "lucide-react";
+import { Wifi, Thermometer, BarChart, Droplet } from "lucide-react";
 import WebSocketStatus from "@/components/sensors/WebSocketStatus";
 import { webSocketService } from "@/services/websocket";
 
@@ -260,7 +259,7 @@ const SensorSetup = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Chart className="h-5 w-5" />
+                <BarChart className="h-5 w-5" />
                 Configuración de Datos
               </CardTitle>
               <CardDescription>
