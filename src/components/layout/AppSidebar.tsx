@@ -26,13 +26,13 @@ const AppSidebar = () => {
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4">
           <Thermometer className="h-6 w-6 text-mezcal-amber" />
-          <span className="text-lg font-bold">Tina Monitor</span>
+          <span className="text-lg font-bold">Monitor de Fermentación</span>
         </div>
       </SidebarHeader>
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navegación</SidebarGroupLabel>
+          <SidebarGroupLabel>Menú de Navegación</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => (

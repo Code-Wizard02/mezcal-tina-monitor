@@ -11,7 +11,7 @@ const AppLayout = () => {
         <div className="p-6">
           <div className="flex items-center mb-6">
             <SidebarTrigger className="mr-2" />
-            <h1 className="text-2xl font-semibold">Monitor de Tinas de Mezcal</h1>
+            <h1 className="text-2xl font-semibold">Monitor de Fermentación</h1>
           </div>
           <Outlet />
         </div>

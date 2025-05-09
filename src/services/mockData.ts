@@ -17,7 +17,7 @@ export const generateMockVats = (count: number = 6): Vat[] => {
     
     return {
       id: `vat-${i + 1}`,
-      name: `Tina ${i + 1}`,
+      name: `Tina #${i +  1}`,
       temperature: getRandomNumber(25, 35),
       pH: getRandomNumber(3.5, 5.5),
       liquidLevel: getRandomNumber(50, 100),
