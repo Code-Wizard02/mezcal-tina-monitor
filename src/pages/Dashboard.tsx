@@ -1,16 +1,19 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { mockVats } from "@/services/mockData";
+import { toast } from "sonner";
+import { mockVats, getLatestVatReadings, getVatFermentationTime } from "@/services/mockData";
 import { Vat } from "@/types/vat";
 import VatCard from "@/components/vats/VatCard";
 import WebSocketStatus from "@/components/sensors/WebSocketStatus";
 import { webSocketService } from "@/services/websocket";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
   const [vats, setVats] = useState<Vat[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { toast } = useToast();
+  const { toast: toastNotification } = useToast();
 
   useEffect(() => {
     // Simulate loading data
@@ -22,7 +25,7 @@ const Dashboard = () => {
         setVats(mockVats);
       } catch (error) {
         console.error("Failed to fetch vats:", error);
-        toast({
+        toastNotification({
           title: "Error",
           description: "No se pudieron cargar las tinas",
           variant: "destructive",
@@ -50,13 +53,29 @@ const Dashboard = () => {
     return () => {
       webSocketService.unsubscribe("vat:all:update", () => {});
     };
-  }, [toast]);
+  }, [toastNotification]);
+
+  const handleCreateVat = () => {
+    toast.info("Funcionalidad para crear nueva tina en desarrollo");
+  };
+  
+  const handleCreateSensor = () => {
+    toast.info("Funcionalidad para crear nuevo sensor en desarrollo");
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Monitoreo de Tinas</h2>
-        <WebSocketStatus />
+        <div className="flex gap-4">
+          <Button onClick={handleCreateSensor} variant="outline" className="gap-2">
+            <Plus className="h-4 w-4" /> Crear Sensor
+          </Button>
+          <Button onClick={handleCreateVat} className="gap-2">
+            <Plus className="h-4 w-4" /> Crear Tina
+          </Button>
+          <WebSocketStatus />
+        </div>
       </div>
       
       {loading ? (
@@ -67,9 +86,21 @@ const Dashboard = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vats.map((vat) => (
-            <VatCard key={vat.id} vat={vat} />
-          ))}
+          {vats.map((vat) => {
+            const { temperature, pH, liquidLevel } = getLatestVatReadings(vat.id);
+            const fermentationTime = getVatFermentationTime(vat.id);
+            
+            return (
+              <VatCard
+                key={vat.id} 
+                vat={vat}
+                temperature={temperature}
+                pH={pH}
+                liquidLevel={liquidLevel}
+                fermentationTime={fermentationTime}
+              />
+            );
+          })}
         </div>
       )}
     </div>
