@@ -3,23 +3,23 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { mockVats } from "@/services/mockData";
-import { Vat } from "@/types/vat";
+import { mockVats, getLatestVatReadings } from "@/services/mockData";
+import { Vat, VatStatus } from "@/types/vat";
 
 // Mock report data
 const mockReportData = {
   weekly: [
-    { name: "Tina 1", efficiency: 92, avgTemp: 28.3, avgPh: 4.5, status: "fermentation" },
-    { name: "Tina 2", efficiency: 87, avgTemp: 27.9, avgPh: 4.3, status: "distillation" },
-    { name: "Tina 3", efficiency: 93, avgTemp: 29.1, avgPh: 4.7, status: "rest" },
-    { name: "Tina 4", efficiency: 89, avgTemp: 28.5, avgPh: 4.4, status: "complete" },
+    { name: "Tina 1", efficiency: 92, avgTemp: 28.3, avgPh: 4.5, status: "fermentando" },
+    { name: "Tina 2", efficiency: 87, avgTemp: 27.9, avgPh: 4.3, status: "destilando" },
+    { name: "Tina 3", efficiency: 93, avgTemp: 29.1, avgPh: 4.7, status: "reposando" },
+    { name: "Tina 4", efficiency: 89, avgTemp: 28.5, avgPh: 4.4, status: "vacio" },
   ],
   monthly: [
-    { name: "Tina 1", efficiency: 90, avgTemp: 28.5, avgPh: 4.6, status: "fermentation" },
-    { name: "Tina 2", efficiency: 85, avgTemp: 27.8, avgPh: 4.2, status: "distillation" },
-    { name: "Tina 3", efficiency: 91, avgTemp: 29.0, avgPh: 4.8, status: "rest" },
-    { name: "Tina 4", efficiency: 88, avgTemp: 28.3, avgPh: 4.5, status: "complete" },
-    { name: "Tina 5", efficiency: 92, avgTemp: 28.7, avgPh: 4.4, status: "fermentation" },
+    { name: "Tina 1", efficiency: 90, avgTemp: 28.5, avgPh: 4.6, status: "fermentando" },
+    { name: "Tina 2", efficiency: 85, avgTemp: 27.8, avgPh: 4.2, status: "destilando" },
+    { name: "Tina 3", efficiency: 91, avgTemp: 29.0, avgPh: 4.8, status: "reposando" },
+    { name: "Tina 4", efficiency: 88, avgTemp: 28.3, avgPh: 4.5, status: "vacio" },
+    { name: "Tina 5", efficiency: 92, avgTemp: 28.7, avgPh: 4.4, status: "fermentando" },
   ]
 };
 
@@ -94,7 +94,7 @@ const Reports = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-4xl font-bold text-mezcal-amber">
-                    {filteredVats.filter(vat => vat.status !== "complete").length}
+                    {filteredVats.filter(vat => vat.status !== "vacio").length}
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
                     De un total de {filteredVats.length} tinas
@@ -108,7 +108,10 @@ const Reports = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-4xl font-bold text-mezcal-green">
-                    {(filteredVats.reduce((acc, vat) => acc + vat.temperature, 0) / filteredVats.length).toFixed(1)}°C
+                    {(filteredVats.reduce((acc, vat) => {
+                      const readings = getLatestVatReadings(vat.id);
+                      return acc + readings.temperature;
+                    }, 0) / filteredVats.length).toFixed(1)}°C
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
                     Rango óptimo: 26°C - 32°C
@@ -122,7 +125,10 @@ const Reports = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-4xl font-bold text-mezcal-terracotta">
-                    {(filteredVats.reduce((acc, vat) => acc + vat.pH, 0) / filteredVats.length).toFixed(1)}
+                    {(filteredVats.reduce((acc, vat) => {
+                      const readings = getLatestVatReadings(vat.id);
+                      return acc + readings.pH;
+                    }, 0) / filteredVats.length).toFixed(1)}
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
                     Rango óptimo: 3.5 - 5.5
@@ -137,16 +143,16 @@ const Reports = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex justify-around items-center h-64">
-                  {(["fermentation", "distillation", "rest", "complete"] as Vat["status"][]).map(status => {
+                  {(["fermentando", "destilando", "reposando", "vacio"] as VatStatus[]).map(status => {
                     const count = filteredVats.filter(vat => vat.status === status).length;
                     const percentage = (count / filteredVats.length) * 100;
                     
                     return (
                       <div key={status} className="flex flex-col items-center">
                         <div className="text-sm text-muted-foreground mb-2">
-                          {status === "fermentation" ? "Fermentación" :
-                           status === "distillation" ? "Destilación" :
-                           status === "rest" ? "Reposo" : "Completado"}
+                          {status === "fermentando" ? "Fermentación" :
+                           status === "destilando" ? "Destilación" :
+                           status === "reposando" ? "Reposo" : "Disponible"}
                         </div>
                         <div className="relative w-20">
                           <div className="absolute bottom-0 w-full bg-muted rounded-t-sm" style={{ height: `${Math.max(5, percentage)}%` }}>
@@ -196,9 +202,9 @@ const Reports = () => {
                           <td className="px-6 py-4">{item.avgPh}</td>
                           <td className="px-6 py-4">
                             <span className={`px-2 py-1 rounded text-xs vat-status-${item.status}`}>
-                              {item.status === "fermentation" ? "Fermentación" :
-                              item.status === "distillation" ? "Destilación" :
-                              item.status === "rest" ? "Reposo" : "Completado"}
+                              {item.status === "fermentando" ? "Fermentación" :
+                              item.status === "destilando" ? "Destilación" :
+                              item.status === "reposando" ? "Reposo" : "Disponible"}
                             </span>
                           </td>
                         </tr>

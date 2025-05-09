@@ -123,8 +123,8 @@ export const generateMockBatches = (vats: Vat[]): Batch[] => {
         vatId: vat.id,
         agaveType: vat.agaveType,
         startDate,
-        endDate: vat.status === 'finalizado' ? new Date() : null,
-        status: vat.status === 'finalizado' ? 'finalizado' : 'en_proceso',
+        endDate: vat.status === 'reposando' ? new Date() : null,
+        status: vat.status === 'reposando' ? 'finalizado' : 'en_proceso',
         notes: `Lote de ${vat.agaveType} en ${vat.name}. Proceso iniciado el ${startDate.toLocaleDateString()}.`,
       });
     }
