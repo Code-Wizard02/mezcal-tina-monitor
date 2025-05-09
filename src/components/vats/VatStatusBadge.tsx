@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { VatStatus } from "@/types/vat";
 
 const statusLabels: Record<VatStatus, string> = {
-  fermentation: "Fermentación",
-  distillation: "Destilación",
-  rest: "Reposo",
-  complete: "Completado"
+  fermentando: "Fermentando",
+  destilando: "Destilando",
+  reposando: "Reposando",
+  vacio: "Disponible"
 };
 
 interface VatStatusBadgeProps {

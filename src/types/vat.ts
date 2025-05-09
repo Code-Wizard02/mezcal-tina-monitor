@@ -1,16 +1,12 @@
 
-export type VatStatus = 'fermentation' | 'distillation' | 'rest' | 'complete';
+export type VatStatus = 'fermentando' | 'destilando' | 'reposando' | 'vacio';
 
 export interface Vat {
   id: string;
-  name: string;
-  temperature: number;
-  pH: number;
-  liquidLevel: number; // percentage
-  fermentationTime: number; // hours
+  name: string; // "Tina #1", "Tina #2", etc.
+  capacity: number; // liters
   status: VatStatus;
-  agaveType: string;
-  agaveAge: number; // years
+  agaveType: string; // "Espadin", "Madre cuishe", etc.
   createdAt: Date;
   lastUpdated: Date;
 }

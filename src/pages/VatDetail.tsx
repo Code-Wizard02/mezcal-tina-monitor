@@ -1,15 +1,16 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Clock, Calendar, ArrowLeft, Droplet, Thermometer } from "lucide-react";
+import { Clock, Calendar, ArrowLeft, Droplet, Thermometer, FlaskConical, FlaskRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockVats, generateVatHistory } from "@/services/mockData";
+import { mockVats, generateVatHistory, getLatestVatReadings, getVatBatch, getVatFermentationTime } from "@/services/mockData";
 import { Vat, VatHistory } from "@/types/vat";
 import VatStatusBadge from "@/components/vats/VatStatusBadge";
 import VatChart from "@/components/charts/VatChart";
 import { useWebSocketForVat } from "@/services/websocket";
 import { Separator } from "@/components/ui/separator";
+import { Batch } from "@/types/batch";
 
 const formatDate = (date: Date): string => {
   return new Intl.DateTimeFormat('es-MX', {
@@ -26,7 +27,10 @@ const VatDetail = () => {
   const navigate = useNavigate();
   const [vat, setVat] = useState<Vat | null>(null);
   const [vatHistory, setVatHistory] = useState<VatHistory | null>(null);
+  const [batch, setBatch] = useState<Batch | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [readings, setReadings] = useState({ temperature: 0, pH: 0, liquidLevel: 0 });
+  const [fermentationTime, setFermentationTime] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,6 +44,19 @@ const VatDetail = () => {
         
         if (foundVat) {
           setVat(foundVat);
+          
+          // Get batch information
+          const foundBatch = getVatBatch(foundVat.id);
+          setBatch(foundBatch || null);
+          
+          // Get latest readings
+          const latestReadings = getLatestVatReadings(foundVat.id);
+          setReadings(latestReadings);
+          
+          // Get fermentation time
+          const time = getVatFermentationTime(foundVat.id);
+          setFermentationTime(time);
+          
           // Get historical data
           const history = generateVatHistory(foundVat.id);
           setVatHistory(history);
@@ -120,9 +137,25 @@ const VatDetail = () => {
               <p className="font-medium">{vat.agaveType}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Edad del Agave</p>
-              <p className="font-medium">{vat.agaveAge} años</p>
+              <p className="text-sm text-muted-foreground">Capacidad de la Tina</p>
+              <p className="font-medium">{vat.capacity} L</p>
             </div>
+            {batch && (
+              <>
+                <Separator />
+                <div>
+                  <p className="text-sm text-muted-foreground">Inicio del Proceso</p>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <p>{formatDate(batch.startDate)}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Notas</p>
+                  <p className="text-sm">{batch.notes}</p>
+                </div>
+              </>
+            )}
             <Separator />
             <div>
               <p className="text-sm text-muted-foreground">Tina Creada</p>
@@ -150,25 +183,25 @@ const VatDetail = () => {
               <div className="flex flex-col items-center p-4 bg-mezcal-amber/10 rounded-md">
                 <Thermometer className="h-8 w-8 text-mezcal-amber mb-2" />
                 <p className="text-sm text-muted-foreground">Temperatura</p>
-                <p className="text-2xl font-medium">{vat.temperature}°C</p>
+                <p className="text-2xl font-medium">{readings.temperature}°C</p>
               </div>
               
               <div className="flex flex-col items-center p-4 bg-mezcal-green/10 rounded-md">
                 <span className="text-xl font-bold mb-2 text-mezcal-green">pH</span>
                 <p className="text-sm text-muted-foreground">Nivel Acidez</p>
-                <p className="text-2xl font-medium">{vat.pH}</p>
+                <p className="text-2xl font-medium">{readings.pH}</p>
               </div>
               
               <div className="flex flex-col items-center p-4 bg-blue-500/10 rounded-md">
                 <Droplet className="h-8 w-8 text-blue-500 mb-2" />
                 <p className="text-sm text-muted-foreground">Nivel Líquido</p>
-                <p className="text-2xl font-medium">{vat.liquidLevel}%</p>
+                <p className="text-2xl font-medium">{readings.liquidLevel}%</p>
               </div>
               
               <div className="flex flex-col items-center p-4 bg-mezcal-terracotta/10 rounded-md">
                 <Clock className="h-8 w-8 text-mezcal-terracotta mb-2" />
                 <p className="text-sm text-muted-foreground">Tiempo Fermentación</p>
-                <p className="text-2xl font-medium">{vat.fermentationTime}h</p>
+                <p className="text-2xl font-medium">{fermentationTime}h</p>
               </div>
             </div>
           </CardContent>
